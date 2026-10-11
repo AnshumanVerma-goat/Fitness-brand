@@ -8,7 +8,7 @@ A production-structured, full-stack fitness supplement e-commerce platform faith
 
 - **Framework**: Next.js 14+ (App Router), React 19, TypeScript
 - **Styling**: Tailwind CSS with custom athletic dark theme tokens (`#0c0c0e`, `#ff5c00`, `#f59e0b`)
-- **Database & ORM**: SQLite (`prisma/dev.db`) via Prisma ORM 6.19 (PostgreSQL-compatible relational schema)
+- **Database & ORM**: PostgreSQL via Prisma ORM 6.19
 - **Authentication**: Salted Bcrypt password hashing with HttpOnly session cookies
 - **Icons**: Lucide React
 - **Validation & Math**: Server-side coupon verification, variant price validation, and atomic orders persistence
@@ -23,21 +23,35 @@ npm install
 ```
 
 ### 2. Configure Environment
-A `.env` file is included by default:
+A `.env` file is required:
 ```env
-DATABASE_URL="file:./dev.db"
-SESSION_SECRET="muscleblaze-secret-key-32characters-secure!"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require"
+SESSION_SECRET="replace-with-a-long-random-secret"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
+
+For local development, use a Neon development branch or another PostgreSQL
+database. SQLite is not supported because Vercel's filesystem is ephemeral.
 
 ### 3. Initialize Database & Seed Catalog
 The seed script populates 28+ sports nutrition products across 8 categories, 80+ variants, demo reviews, coupons, and demo accounts:
 ```bash
-npx prisma db push
+npx prisma migrate deploy
 npx tsx prisma/seed.ts
 ```
 
-### 4. Run Development Server
+### 4. Deploy to Vercel
+
+Import the GitHub repository into Vercel and add `DATABASE_URL`,
+`SESSION_SECRET`, and `NEXT_PUBLIC_APP_URL` to the Production environment.
+Set `NEXT_PUBLIC_APP_URL` to the deployed Vercel URL after the first deploy.
+Run the migration and seed commands against the production database once:
+```bash
+npx prisma migrate deploy
+npx tsx prisma/seed.ts
+```
+
+### 5. Run Development Server
 ```bash
 npm run dev
 # Or run production build:
